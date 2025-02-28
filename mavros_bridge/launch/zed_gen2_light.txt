@@ -1,0 +1,9 @@
+===== Odometry Comparison Summary =====
+/zed_node/odom Publishing Rate: 55.42 ± 41.88 Hz
+/mavros/odometry/in Publishing Rate: 1.50 ± 0.01 Hz
+Average Position Difference: 0.1423 ± 0.0529 m
+Average Orientation Difference: 63.75 ± 55.97 degrees
+Average Timestamp Difference: 54.41 ± 35.46 ms
+Average Velocity Difference: 0.2158 ± 0.1490 m/s
+=====================================
+
