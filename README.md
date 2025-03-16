@@ -9,6 +9,9 @@ mkdir src
 mv mavros_bridge src/mavros_bridge
 mv uosm_robot_viewer src/uosm_robot_viewer
 mv zed_ros2_minimal src/zed_ros2_minimal
+mv ros_deep_learning src/ros_deep_learning
+mv stream_data src/stream_data
+mv udp_mavros_bridge src/udp_mavros_bridge
 ```
 
 2. Get dependencies
