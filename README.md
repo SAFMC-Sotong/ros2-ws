@@ -32,3 +32,82 @@ source install/setup.bash
 ```
 ros2 launch mavros_bridge mavros_bridge.launch.py
 ```
+## Systemctl setup 
+### csi_stream.service
+1. Go to the directory
+```
+cd /etc/systemd/system
+sudo gedit csi_stream.service
+```
+2. Paste the following
+```
+[Unit]
+Description=Launch CSI streaming
+After=network.target
+
+[Service]
+Type=simple
+Environment="HOME=/home/nvidia" # HOME_DIR
+Environment="USER=nvidia" #USER
+ExecStart=/usr/bin/bash /home/nvidia/workspaces/ros2/csi.sh # where the actual sh script is
+WorkingDirectory=/home/nvidia/workspaces/ros2-ws
+Restart=on-failure
+User=nvidia #USER
+Group=nvidia #USER
+# Set the ROS 2 workspace environment variables if necessary
+
+[Install]
+WantedBy=multi-user.target
+
+```
+4. Save and exit, then.
+```
+sudo systemctl daemon-reload
+sudo systemctl enable csi_stream.service
+# To check if the service is running 
+sudo systemctl status csi_stream.service 
+
+
+(Optional)
+sudo systemctl start/stop/restart csi_stream.service
+
+```
+### Mavros_bridge.service
+1. Go to the directory
+```
+cd /etc/systemd/system
+sudo gedit mavros_bridge.service
+```
+2. Paste the following
+```
+[Unit]
+Description=Launch MAVROS Bridge
+After=network.target
+
+[Service]
+Type=simple
+Environment="HOME=/home/nvidia" # HOME_DIR
+Environment="USER=nvidia" #USER
+ExecStart=/usr/bin/bash /home/nvidia/workspaces/ros2/1run.sh # where the actual sh script is
+WorkingDirectory=/home/nvidia/workspaces/ros2-ws
+Restart=on-failure
+User=nvidia #USER
+Group=nvidia #USER
+# Set the ROS 2 workspace environment variables if necessary
+
+[Install]
+WantedBy=multi-user.target
+
+```
+4. Save and exit, then.
+```
+sudo systemctl daemon-reload
+sudo systemctl enable mavros_bridge.service
+# To check if the service is running 
+sudo systemctl status mavros_bridge.service 
+
+
+(Optional)
+sudo systemctl start/stop/restart mavros_bridge.service
+
+```
