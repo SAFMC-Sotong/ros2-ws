@@ -48,6 +48,7 @@ namespace stereolabs
     void getDepthParams();
     void getPosTrackingParams();
     void getSensorsParams();
+    void getStreamingServerParams();
     void getAdvancedParams();
 
     void setTFCoordFrameNames();
@@ -132,6 +133,7 @@ namespace stereolabs
     bool getCamera2BaseTransform();
 
     void startPathPubTimer(double pathTimerRate);
+    bool startStreamingServer();
     
     std::string getParam(std::string param_name, std::vector<std::vector<float> >& value);
 
@@ -204,6 +206,7 @@ namespace stereolabs
 
     bool mPosTrackingEnabled = false;
     bool mLightComputeEnabled = false;
+
     bool mPublishTF = false;
     bool mPublishMapTF = false;
     bool mPublishImuTF = false;
@@ -410,6 +413,21 @@ namespace stereolabs
     std::vector<geometry_msgs::msg::PoseStamped> mOdomPath;
     std::vector<geometry_msgs::msg::PoseStamped> mPosePath;
     // <---- Positional Tracking
+
+    // ----> Stream Server
+    bool mStreamMode = false;     // Expecting local streaming data?
+    int mStreamPort = 30000;  // The port to be used to connect to a local streaming server
+    std::atomic<bool> mStreamingServerRequired = false;
+    std::atomic<bool> mStreamingServerRunning = false;
+
+    sl::STREAMING_CODEC mStreamingServerCodec = sl::STREAMING_CODEC::H264;
+    int mStreamingServerPort = 30000;
+    int mStreamingServerBitrate = 12500;
+    int mStreamingServerGopSize = -1;
+    bool mStreamingServerAdaptiveBitrate = false;
+    int mStreamingServerChunckSize = 16084;
+    int mStreamingServerTargetFramerate = 0;
+    // <---- Stream Server
 
     // ----> Diagnostic
     sl_tools::StopWatch mUptimer;

@@ -111,7 +111,8 @@ def generate_launch_description():
         {    
             # 'fcu_url': '/dev/ttyTHS1:1000000',
             'fcu_url': '/dev/ttyACM0:2000000',
-            'gcs_url': 'udp://@10.42.0.1',
+            #'gcs_url': 'udp://@192.168.230.101',
+            'gcs_url': 'udp://@10.42.0.189',
             #'gcs_url': 'udp://@10.100.18.240',
             'tgt_system': 1,
             'tgt_component': 1,

@@ -305,7 +305,6 @@ namespace stereolabs
       getSensorsParams();
     }
 
-    getStreamingServerParams();
     getAdvancedParams();
   }
 
@@ -390,7 +389,6 @@ namespace stereolabs
   void ZedCamera::getGeneralParams()
   {
     rclcpp::Parameter paramVal;
-
 
     RCLCPP_INFO(get_logger(), "*** GENERAL parameters ***");
 
@@ -940,7 +938,6 @@ namespace stereolabs
     getParam(
         "pos_tracking.reset_odom_with_loop_closure",
         mResetOdomWhenLoopClosure, mResetOdomWhenLoopClosure);
-    mResetOdomWhenLoopClosure = false;
     RCLCPP_INFO_STREAM(
         get_logger(),
         " * Reset Odometry with Loop Closure: "
@@ -955,105 +952,6 @@ namespace stereolabs
           "pos_tracking.fixed_z_value", mFixedZValue, mFixedZValue,
           " * Fixed Z value: ");
     }
-  }
-
-  void ZedCamera::getStreamingServerParams()
-  {
-    rclcpp::Parameter paramVal;
-  
-    rcl_interfaces::msg::ParameterDescriptor read_only_descriptor;
-    read_only_descriptor.read_only = true;
-  
-    RCLCPP_INFO(get_logger(), "*** Streaming Server parameters ***");
-    
-    bool stream_server = false;
-    getParam("stream_server.stream_enabled", stream_server, stream_server);
-    mStreamingServerRequired = stream_server;
-    RCLCPP_INFO_STREAM(
-      get_logger(),
-      " * Streaming Server enabled: "
-        << (mStreamingServerRequired ? "TRUE" : "FALSE"));
-  
-    std::string codec = "H264";
-    getParam("stream_server.codec", codec, codec);
-    if (codec == "H264") {
-      mStreamingServerCodec = sl::STREAMING_CODEC::H264;
-      RCLCPP_INFO(get_logger(), " * Stream codec: H264");
-    } else if (codec == "H265") {
-      mStreamingServerCodec = sl::STREAMING_CODEC::H265;
-      RCLCPP_INFO(get_logger(), " * Stream codec: H265");
-    } else {
-      mStreamingServerCodec = sl::STREAMING_CODEC::H264;
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.codec': " << codec <<
-          ". Using the default value.");
-      RCLCPP_INFO(get_logger(), " * Stream codec: H264");
-    }
-  
-    getParam("stream_server.port", mStreamingServerPort, mStreamingServerPort, " * Stream port: ");
-  
-    getParam("stream_server.bitrate", mStreamingServerBitrate, mStreamingServerBitrate);
-    if (mStreamingServerBitrate < 1000) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.bitrate': " << codec <<
-          ". The minimum allowed value is 1000");
-      mStreamingServerBitrate = 1000;
-    }
-    if (mStreamingServerBitrate > 60000) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.bitrate': " << codec <<
-          ". The maximum allowed value is 60000");
-      mStreamingServerBitrate = 60000;
-    }
-    RCLCPP_INFO_STREAM(get_logger(), " * Stream bitrate: " << mStreamingServerBitrate);
-  
-    getParam("stream_server.gop_size", mStreamingServerGopSize, mStreamingServerGopSize);
-    if (mStreamingServerGopSize < -1) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.gop_size': " << codec <<
-          ". The minimum allowed value is -1");
-      mStreamingServerGopSize = -1;
-    }
-    if (mStreamingServerGopSize > 256) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.gop_size': " << codec <<
-          ". The maximum allowed value is 256");
-      mStreamingServerGopSize = 256;
-    }
-    RCLCPP_INFO_STREAM(get_logger(), " * Stream GOP size: " << mStreamingServerGopSize);
-  
-    getParam("stream_server.chunk_size", mStreamingServerChunckSize, mStreamingServerChunckSize);
-    if (mStreamingServerChunckSize < 1024) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.chunk_size': " << codec <<
-          ". The minimum allowed value is 1024");
-      mStreamingServerChunckSize = 1024;
-    }
-    if (mStreamingServerChunckSize > 65000) {
-      RCLCPP_WARN_STREAM(
-        get_logger(),
-        "Invalid value for the parameter 'stream_server.chunk_size': " << codec <<
-          ". The maximum allowed value is 65000");
-      mStreamingServerChunckSize = 65000;
-    }
-    RCLCPP_INFO_STREAM(get_logger(), " * Stream Chunk size: " << mStreamingServerChunckSize);
-  
-    getParam(
-      "stream_server.adaptative_bitrate", mStreamingServerAdaptiveBitrate,
-      mStreamingServerAdaptiveBitrate);
-    RCLCPP_INFO_STREAM(
-      get_logger(),
-      " * Adaptive bitrate: " << (mStreamingServerAdaptiveBitrate ? "TRUE" : "FALSE"));
-  
-    getParam(
-      "stream_server.target_framerate", mStreamingServerTargetFramerate,
-      mStreamingServerTargetFramerate, " * Target frame rate:");
   }
 
   void ZedCamera::getAdvancedParams()
@@ -3126,42 +3024,6 @@ namespace stereolabs
     mImuTfFreqTimer.tic();
   }
 
-  bool ZedCamera::startStreamingServer()
-  {
-
-    if (mZed->isStreamingEnabled())
-    {
-      mZed->disableStreaming();
-      RCLCPP_WARN(get_logger(), "A streaming server was already running and has been stopped");
-    }
-
-    sl::StreamingParameters params;
-    params.adaptative_bitrate = mStreamingServerAdaptiveBitrate;
-    params.bitrate = mStreamingServerBitrate;
-    params.chunk_size = mStreamingServerChunckSize;
-    params.codec = mStreamingServerCodec;
-    params.gop_size = mStreamingServerGopSize;
-    params.port = mStreamingServerPort;
-    params.target_framerate = mStreamingServerTargetFramerate;
-
-    sl::ERROR_CODE res;
-    res = mZed->enableStreaming(params);
-    if (res != sl::ERROR_CODE::SUCCESS)
-    {
-      RCLCPP_ERROR_STREAM(
-          get_logger(), "Error starting the Streaming server: " << sl::toString(
-                                                                       res)
-                                                                << " - " << sl::toVerbose(res));
-      mStreamingServerRunning = false;
-    }
-    else
-    {
-      mStreamingServerRunning = true;
-      RCLCPP_INFO(get_logger(), "Streaming server started");
-    }
-    return mStreamingServerRunning;
-  }
-
   void ZedCamera::threadFunc_zedGrab()
   {
     DEBUG_STREAM_COMM("Grab thread started");
@@ -3295,14 +3157,6 @@ namespace stereolabs
         // ----> Apply video dynamic parameters
         applyVideoSettings();
         // <---- Apply video dynamic parameters
-
-        // ---->  Start streaming server
-        if (mStreamingServerRequired && !mStreamingServerRunning)
-        {
-          RCLCPP_INFO(get_logger(), "*** Start streaming server! ~~~~~~~~~~~~~~~~~~~~~ ***");
-          startStreamingServer();
-        }
-        // <---- Start streaming server
 
         // ----> Check for Positional Tracking requirement
         if (isPosTrackingRequired() && !mPosTrackingStarted)
