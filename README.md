@@ -18,7 +18,7 @@ mv udp_mavros_bridge src/udp_mavros_bridge
 
 2. Get dependencies
 ```
-sudo apt-get install ros-humble-mavros
+sudo apt-get install ros-humble-mavros ros-humble-mavros-extras
 sudo chmod +x src/mavros_bridge/install_geolib.sh
 sudo ./src/mavros_bridge/install_geolib.sh
 ```
@@ -26,7 +26,7 @@ sudo ./src/mavros_bridge/install_geolib.sh
 3. Build and source
 ```
 sudo apt update
-rosdep install --from-path src --ignore-src -y
+rosdep update && rosdep install --from-path src --ignore-src -y --rosdistro humble
 colcon build --symlink-install --base-paths  src --cmake-args=-DCMAKE_BUILD_TYPE=Release --parallel-workers $(nproc)
 source install/setup.bash
 ```
