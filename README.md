@@ -1,7 +1,9 @@
 # ros2-ws
 Minimal ROS2 workspace to get started
 
-1. Setup workspace
+0. Install ZED SDK for Jetson (https://www.stereolabs.com/en-my/developers/release/)
+   
+2. Setup workspace
 ```
 git clone https://github.com/SAFMC-Sotong/ros2-ws.git
 cd ros2-ws
@@ -16,8 +18,9 @@ mv udp_mavros_bridge src/udp_mavros_bridge
 
 2. Get dependencies
 ```
-sudo apt get install ros-humble-mavros
-./src/mavros_bridge/install_geolib.sh
+sudo apt-get install ros-humble-mavros
+sudo chmod +x src/mavros_bridge/install_geolib.sh
+sudo ./src/mavros_bridge/install_geolib.sh
 ```
 
 3. Build and source
